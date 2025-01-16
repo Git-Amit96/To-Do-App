@@ -24,7 +24,7 @@ const addActivity = async (req, res) => {
         })
 
         await activityObj.save();
-        return res.status(201).json({ status: "Success", message: "Activity added successfully" });
+        return res.status(201).json({ success: true, message: "Activity added successfully" });
 
     } catch (err) {
         return res.status(500).json({ status: "Error", message: "Failed to create task", error: err.message });
@@ -40,9 +40,9 @@ const getActivity = async (req, res) => {
         }).sort({createdAt: 1}).select("-task").populate("owner", "Name");
 
         if(!allActivities){
-            return res.status(500).json({ status: "Error", message: "Not such Task exist." });
+            return res.status(500).json({ success: false, message: "Not such Task exist." });
         }
-        return res.status(201).json({ status: "Success", data: allActivities });
+        return res.status(201).json({ success: "true", info: allActivities });
 
     } catch (error) {
         return res.status(500).json({ status: "Error", message: "Failed to get activities", error: err.message });

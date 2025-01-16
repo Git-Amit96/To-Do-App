@@ -9,94 +9,110 @@ const signUp = async (req, res) => {
         const { name, email, password } = req.body;
 
         if (!name || !email || !password) {
-            return res.status(400).json({ status: "Failed", message: "All fields are mandatory" });
+            return res.status(400).json({ success: false, message: "All fields are mandatory" });
         }
 
         const isPerfect = isValid({ email, password });
         if (!isPerfect) {
-            return res.status(400).json({ status: "Error", message: "Password or Email is not strong or valid" });
+            return res.status(400).json({ success: false, message: "Password or Email is not strong or valid" });
         }
 
         const isPresent = await Profile.findOne({ Email: email });
         if (isPresent) {
-            return res.status(400).json({ status: "Error", message: "User already registered. Please Sign In." });
+            return res.status(400).json({ success: false, message: "User already registered. Please Sign In." });
         }
 
         const hashPassword = await bcrypt.hash(password, 10);
-        const otp = (Math.floor(Math.random() * 900000) + 100000).toString();
+        // const otp = (Math.floor(Math.random() * 900000) + 100000).toString();
 
         const user = new Profile({
             Name: name,
             Email: email,
             Password: hashPassword,
-            OTP: otp,
+           
         });
         await user.save();
 
         return res.status(201).json({
-            status: "Success",
+            success: true,
             message: "User Registered Successfully. Now SignIn.",
-            OTP: otp,
+            
         });
     } catch (err) {
-        res.status(500).json({ status: "Failed", message: "SignUp Failed. Please Try Again" });
+        res.status(500).json({ success: false, message: "SignUp Failed. Please Try Again" });
     }
 };
 
 const signIn = async (req, res) => {
     try {
-        const { email, password, otp } = req.body;
+        const { email, password } = req.body;
         if (!email || !password) {
             throw new Error("All fields are mandatory");
         }
         const isPresent = await Profile.findOne({ Email: email });
         if (!isPresent) {
-            return res.status(400).json({ status: "Error", message: "User not found. Please Sign Up." });
-        } 
-        
-        const passwordCheck= await bcrypt.compare(password, isPresent.Password);
-        if(!passwordCheck){
-            return res.status(400).json({ status: "Error", message: "Password is not correct" });
+            return res.status(400).json({ success: false, message: "User not found. Please Sign Up." });
+        }
 
-        } 
+        const passwordCheck = await bcrypt.compare(password, isPresent.Password);
+        if (!passwordCheck) {
+            return res.status(400).json({ success: false, message: "Password is not correct" });
+
+        }
         const token = jwt.sign({ id: isPresent._id }, "Auth@12345", { expiresIn: "7d" });
-        if (isPresent.isVerified) {
 
-            res.cookie("Token", token);
-            return res.status(201).json({
-                status: "Success",
-                message: "Login Successful",
-                
-            });
-        }
-        const fifteenMinutes = 15 * 60 * 1000;
-        if (Date.now() - new Date(isPresent.updatedAt).getTime() > fifteenMinutes) {
-            return res.status(400).json({ status: "Error", message: "OTP Expired. Please generate new OTP" });
-        }
-        if (isPresent.OTP != otp) {
-            return res.status(400).json({ status: "Error", message: "Invalid OTP" });
-        }
-
-        isPresent.OTP = undefined;
-        isPresent.isVerified = true;
-        await isPresent.save();
-        res.cookie("Token", token);
+        res.cookie("Token", token, {
+            httpOnly: true,   // Prevents JavaScript from accessing the cookie
+            secure: false,    // Set to true in production when using HTTPS
+            sameSite: 'Lax',  // Or 'strict' or 'none' if cross-site, but 'none' requires HTTPS
+        });
         return res.status(201).json({
-            status: "Success",
+            success: true,
             message: "Login Successful",
 
         });
 
+        // const fifteenMinutes = 15 * 60 * 1000;
+        // if (Date.now() - new Date(isPresent.updatedAt).getTime() > fifteenMinutes) {
+        //     return res.status(400).json({ success: false, message: "OTP Expired. Please generate new OTP" });
+        // }
+        // if (isPresent.OTP != otp) {
+        //     return res.status(400).json({ success: false, message: "Invalid OTP" });
+        // }
+
+        // isPresent.OTP = undefined;
+        // isPresent.isVerified = true;
+        // await isPresent.save();
+        // res.cookie("Token", token);
+        // return res.status(201).json({
+        //     success: true,
+        //     message: "Login Successful",
+
+        // });
+
     } catch (err) {
-        res.status(500).json({ status: "Failed", message: "Login Failed. Please Try Again" });
+        res.status(500).json({ success: false, message: "Login Failed. Please Try Again" });
     }
 }
 
-const logout = (req, res) => {
+const isLoggedIn = async(req, res)=>{
+    const token = req.cookies.Token;
+    if(!token){
+        return res.status(400).json({success:false, message: "Access Denied"});
+    }
+    const decoded = jwt.verify(token, "Auth@12345");
+    const user = await Profile.findOne({_id: decoded.id});
+    if (!user) {
+        return res.status(400).json({ success: false, message: "User not found. Please Sign Up." });
+    }
+    return res.status(201).json({success: true, message: "Login Successful"});
+}
+
+const logout = (_, res) => {
     res.cookie("Token", null, {
         expires: new Date(Date.now())
     })
-    res.send("Logged out successful!");
+    res.status(200).json({success:true, message:"Logout Successful"});
 };
 
 const newOtp = async (req, res) => {
@@ -114,7 +130,7 @@ const newOtp = async (req, res) => {
             return res.status(201).json({
                 status: "Success",
                 message: "Already Verified. No need for OTP. SignIn without OTP",
-                
+
             });
         }
 
@@ -134,4 +150,4 @@ const newOtp = async (req, res) => {
 };
 
 
-module.exports = {signUp, signIn, logout, newOtp};
+module.exports = { signUp, signIn, logout, newOtp, isLoggedIn };

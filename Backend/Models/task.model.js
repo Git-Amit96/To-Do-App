@@ -8,12 +8,20 @@ const TaskSchema = new mongoose.Schema({
     status: {
         type: String,
         required: true,
-        enum: ["pending", "completed"],
+        enum: ["delayed", "completed", "running"],
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: "Profile", 
+    },
+    description: {
+        type: String,
+        required: true,
+    },
+    deadline:{
+        type: Date,
+        required: true,
     },
     sharedWith: [{
         type: mongoose.Schema.Types.ObjectId,

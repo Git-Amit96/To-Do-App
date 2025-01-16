@@ -4,12 +4,12 @@ const TaskModel = require("../Models/task.model");
 const CreateTask = async (req, res) => {
     try {
         const loggedInUser = req.user;
-        const { title, status, sharedWith } = req.body;
+        const { title, status, sharedWith, description, deadline } = req.body;
 
         if (!title || !status) {
             return res.status(400).json({ status: "Error", message: "Please provide title and status" });
         }
-        if (!["pending", "completed"].includes(status.toLowerCase())) {
+        if (!["delayed", "completed", "running"].includes(status.toLowerCase())) {
             return res.status(400).json({ status: "Error", message: "Invalid status" });
         }
 
@@ -30,13 +30,15 @@ const CreateTask = async (req, res) => {
             status: status.toLowerCase(),
             owner: loggedInUser._id,
             sharedWith: sharedInfo.map(user => user._id),
+            description: description,
+            deadline: new Date(deadline).toISOString(), 
         });
         await TaskData.save();
 
-        return res.status(201).json({ status: "Success", message: "Task created successfully" });
+        return res.status(201).json({ success: true, message: "Task created successfully" });
 
     } catch (err) {
-        return res.status(500).json({ status: "Error", message: "Failed to create task" });
+        return res.status(500).json({ status: "Error", message: "Failed to create task", error: err.message });
     }
 };
 
@@ -50,21 +52,34 @@ const GetTasks = async (req, res) => {
             ]
         }).populate("owner", "Name").populate("sharedWith", "Name");
         if (allTasks.length === 0) {
-            res.status(400).json({ success: true, message: "No tasks for you." })
+            return res.status(400).json({ success: true, message: "No tasks for you." })
         };
-        return res.status(201).json({ success: true, message: "Your Tasks", data: allTasks });
+        return res.status(200).json({ success: true, message: "Your Tasks", data: allTasks });
 
     } catch (error) {
-        return res.status(500).json({ status: "Error", message: "Failed to get task" });
+        return res.status(500).json({ status: "Error", message: "Failed to get task", success: false });
     }
 };
+
+const FetchTask=async(req, res)=>{
+    const loggedInUser = req.user;
+    const taskId = req.params.id;
+    if (!taskId) {
+        return res.status(400).json({ status: "Error", message: "Please select task" });
+    }
+    const getTask = await TaskModel.findOne({ _id: taskId}).populate("sharedWith", "Name").populate("owner", "Name");
+    if (!getTask) {
+        return res.status(400).json({ success: false, message: "Task not found or you are not authorized to update it" });
+    };
+    return res.status(201).json({ success: true, message: "Task fetched successfully", data: getTask });
+}
 
 const UpdateTask = async (req, res) => {
     try {
 
         const loggedInUser = req.user;
         const taskId = req.params.id;
-        const { title, status } = req.body;
+        const { title, status, description, date } = req.body;
         if (!taskId) {
             return res.status(400).json({ status: "Error", message: "Please select task" });
         }
@@ -74,8 +89,10 @@ const UpdateTask = async (req, res) => {
         };
 
         if (title) getTask.title = title;
+        if (description) getTask.description = description;
+        if(date) getTask.deadline= new Date(date).toISOString();
         if (status) {
-            if (!["pending", "completed"].includes(status.toLowerCase())) {
+            if (!["delayed", "completed", "running"].includes(status.toLowerCase())) {
                 return res.status(400).json({ status: "Error", message: "Invalid status" });
             }
             getTask.status = status.toLowerCase();
@@ -84,7 +101,7 @@ const UpdateTask = async (req, res) => {
 
         return res.status(201).json({ success: true, message: "Task updated successfully", data: getTask });
     } catch (error) {
-        return res.status(500).json({ status: "Error", message: "Updation Failed" });
+        return res.status(500).json({ status: "Error", message: "Updation Failed", error: error.message });
     }
 
 }
@@ -111,5 +128,5 @@ const DeleteTask = async (req, res) => {
 };
 
 
-module.exports = { CreateTask, GetTasks, UpdateTask, DeleteTask };
+module.exports = { CreateTask, GetTasks, UpdateTask, DeleteTask, FetchTask  };
 

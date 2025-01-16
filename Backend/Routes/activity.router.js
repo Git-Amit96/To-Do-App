@@ -5,5 +5,5 @@ const isSignIn = require("../Middlewares/isSignIn");
 const activity = express.Router();
 
 activity.post("/add/:id", isSignIn, addActivity);
-activity.post("/get/:id", isSignIn, getActivity);
+activity.get("/get/:id", isSignIn, getActivity);
 module.exports = activity;

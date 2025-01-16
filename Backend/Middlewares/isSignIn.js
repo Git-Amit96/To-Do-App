@@ -3,7 +3,9 @@ const Profile = require("../Models/user.model");
 
 const isSignIn = async(req, res, next)=>{
     try {
+        // console.log(req.cookies);
         const token = req.cookies.Token;
+        // console.log("Token: ",token);
      
         if(!token){
             throw new Error("Access Denied");
