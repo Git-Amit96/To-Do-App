@@ -15,7 +15,7 @@ const addActivity = async (req, res) => {
 
         );
         if (!isValidId) {
-            return res.status(500).json({ status: "Error", message: "Not such Task exist." });
+            return res.status(500).json({ success: false, message: "Not such Task exist." });
         }
         const activityObj = new ActivityModel({
             owner: loggedInUser._id,
@@ -27,7 +27,7 @@ const addActivity = async (req, res) => {
         return res.status(201).json({ success: true, message: "Activity added successfully" });
 
     } catch (err) {
-        return res.status(500).json({ status: "Error", message: "Failed to create task", error: err.message });
+        return res.status(500).json({ success: false, message: "Failed to create task", error: err.message });
     }
 }
 
@@ -42,10 +42,10 @@ const getActivity = async (req, res) => {
         if(!allActivities){
             return res.status(500).json({ success: false, message: "Not such Task exist." });
         }
-        return res.status(201).json({ success: "true", info: allActivities });
+        return res.status(201).json({ success: true, info: allActivities });
 
     } catch (error) {
-        return res.status(500).json({ status: "Error", message: "Failed to get activities", error: err.message });
+        return res.status(500).json({ success: false, message: "Failed to get activities", error: err.message });
     }
 }
 

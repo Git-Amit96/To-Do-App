@@ -13,17 +13,20 @@ import {
   MdLogout,
 } from "react-icons/md";
 import logo from "../assets/Logo.svg";
-import { clearProfile } from "../Utils/profileSlice";
+import { clearProfile, updatePage } from "../Utils/profileSlice";
 import { clearTasks } from "../Utils/taskSlice";
+
+const apiUrl= import.meta.env.VITE_API_URL;
 
 const SideBar = () => {
   const navigate = useNavigate();
   const dispatch= useDispatch();
   const [activeMenu, setActiveMenu] = useState("Dashboard"); 
+ 
 
   const handleSignOut = async () => {
     try {
-      const response = await fetch("http://localhost:5000/to-do/user/logout", {
+      const response = await fetch(`${apiUrl}user/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -59,15 +62,17 @@ const SideBar = () => {
     }
     else if(id==="Dashboard"){
       setActiveMenu(id);
+      dispatch(updatePage(id))
       navigate("/dashboard");
+
     }
-    
     else {
       setActiveMenu(id);
+      dispatch(updatePage(id));
     }
   };
 
- 
+
   return (
     <div className="w-[30vw] max-w-[250px] h-full bg-slate-200 [min-width:100px]:spx-[1em] text-slate-700 border-x-2 border-gray-300">
       <div className="flex-col py-5 w-[100%]">

@@ -3,7 +3,7 @@ import { createBrowserRouter, RouterProvider, Outlet, Navigate } from "react-rou
 import SideBar from "./Components/SideBar";
 import Header from "./Components/Header";
 import Dashboard from "./Components/Dashboard";
-import CreateTask from "./Components/CreateTask";
+import CreateOrUpdate from "./Components/CreateTask";
 import TaskData from "./Components/TaskData";
 
 
@@ -45,7 +45,7 @@ const appRouter = createBrowserRouter([
       },
       {
         path: "/dashboard/status/:info",
-        element: <CreateTask/>
+        element: <CreateOrUpdate/>
       },
       {
         path: "/dashboard/task/:id",

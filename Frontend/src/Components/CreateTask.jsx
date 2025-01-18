@@ -1,16 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DatePickerComponent from "../Utils/DatePickerComponent";
 import { TextField, Box, Button, Chip, Typography } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+const apiUrl = import.meta.env.VITE_API_URL;
 
-const CreateTask = () => {
+const CreateOrUpdate = () => {
   const [title, setTitle] = useState("");
-  const params= useParams();
   const [description, setDescription] = useState("");
   const [sharedWith, setSharedWith] = useState([]);
   const [emailInput, setEmailInput] = useState("");
   const [deadline, setDeadline] = useState(null);
-  const status= params.info;
+  const [isChecked, setIsChecked] = useState(false);
+  const [statusInfo, setStatusInfo] = useState("running");
+
+  const params = useParams();
+  const status = params.info;
+
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
+  const taskData = useSelector((state) => state.task?.data?.data);
+
+  useEffect(() => {
+    if (status === "create") {
+      setTitle("");
+      setDescription("");
+      setSharedWith([]);
+      setEmailInput("");
+      setDeadline(null);
+      setStatusInfo("running"); // Reset status to default for new tasks
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (status === "update" && taskData) {
+      const specificTask = taskData?.find((e) => e._id.toString() === id.toString());
+      if (specificTask) {
+        setTitle(specificTask.title || "");
+        setDescription(specificTask.description || "");
+        setSharedWith(specificTask.sharedWith.map((e) => e.Email) || []);
+        setDeadline(new Date(specificTask.deadline));
+
+        const deadlineDate = new Date(specificTask.deadline);
+        const dateDifference = deadlineDate.getTime() - Date.now();
+
+        if (isChecked) {
+          setStatusInfo("completed");
+        } else if (dateDifference > 0) {
+          setStatusInfo("running");
+        } else if (dateDifference < 0) {
+          setStatusInfo("delayed");
+        }
+      }
+    }
+  }, [id, taskData, isChecked]); // Add isChecked as a dependency
+
+  const handleCheckboxChange = (event) => {
+    const { checked } = event.target;
+    setIsChecked(checked);
+    setStatusInfo(checked ? "completed" : "running"); // Update status based on checkbox
+  };
 
   const handleAddEmail = () => {
     if (emailInput.trim() && !sharedWith.includes(emailInput)) {
@@ -25,40 +74,43 @@ const CreateTask = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formattedDate = new Date(deadline).toISOString();
-  
+    const formattedDate = deadline ? new Date(deadline).toISOString() : null;
     const taskData = {
       title,
       description,
-      status: "running",
+      status: statusInfo, // Use updated statusInfo here
       sharedWith,
       deadline: formattedDate,
     };
-  
+
     try {
-      console.log(taskData);
-      const response = await fetch("http://localhost:5000/to-do/tasks/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(taskData),
-        credentials: "include",
-      });
-  
+      const response = await fetch(
+        `${apiUrl}tasks/${status === "update" ? `update/${id}` : "create"}`,
+        {
+          method: status === "update" ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(taskData),
+          credentials: "include",
+        }
+      );
+
       const data = await response.json();
       if (data.success) {
         alert(data.message);
-  
+
         // Reset input fields to default values
         setTitle("");
         setDescription("");
         setSharedWith([]);
         setEmailInput("");
         setDeadline(null);
+        setStatusInfo("running"); // Reset status
+        setIsChecked(false); // Reset checkbox
       } else {
-        throw new Error("Task creation failed. Try Again!");
+        throw new Error(data.message || "Task operation failed. Try again!");
       }
     } catch (err) {
-      console.log(err.message);
+      console.log("Error:", err.message);
     }
   };
 
@@ -143,6 +195,19 @@ const CreateTask = () => {
         onChange={(newDate) => setDeadline(newDate)}
       />
 
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="taskCompleted"
+          checked={isChecked}
+          onChange={handleCheckboxChange}
+          className="w-4 h-4"
+        />
+        <label htmlFor="taskCompleted" className="text-gray-700">
+          Mark as Completed
+        </label>
+      </div>
+
       <Button
         variant="contained"
         color="primary"
@@ -150,11 +215,11 @@ const CreateTask = () => {
         fullWidth
         sx={{ mt: 2 }}
       >
-        Create Task
+        {status === "update" ? "Update Task" : "Create Task"}
       </Button>
     </Box>
   );
 };
 
-export default CreateTask;
+export default CreateOrUpdate;
 

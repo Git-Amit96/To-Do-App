@@ -4,6 +4,9 @@ const isValid = require("../Middlewares/Validate.js");
 const jwt = require('jsonwebtoken');
 
 
+const jwtSign = process.env.JWT_SIGN;
+
+
 const signUp = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -46,6 +49,7 @@ const signUp = async (req, res) => {
 const signIn = async (req, res) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
             throw new Error("All fields are mandatory");
         }
@@ -59,7 +63,7 @@ const signIn = async (req, res) => {
             return res.status(400).json({ success: false, message: "Password is not correct" });
 
         }
-        const token = jwt.sign({ id: isPresent._id }, "Auth@12345", { expiresIn: "7d" });
+        const token = jwt.sign({ id: isPresent._id }, jwtSign, { expiresIn: "7d" });
 
         res.cookie("Token", token, {
             httpOnly: true,   // Prevents JavaScript from accessing the cookie
@@ -98,9 +102,9 @@ const signIn = async (req, res) => {
 const isLoggedIn = async(req, res)=>{
     const token = req.cookies.Token;
     if(!token){
-        return res.status(400).json({success:false, message: "Access Denied"});
+        return res.status(400).json({success:false, message: "Access Denied. Login Again"});
     }
-    const decoded = jwt.verify(token, "Auth@12345");
+    const decoded = jwt.verify(token, jwtSign);
     const user = await Profile.findOne({_id: decoded.id});
     if (!user) {
         return res.status(400).json({ success: false, message: "User not found. Please Sign Up." });
@@ -150,4 +154,4 @@ const newOtp = async (req, res) => {
 };
 
 
-module.exports = { signUp, signIn, logout, newOtp, isLoggedIn };
+module.exports = { signUp, signIn, logout, isLoggedIn };

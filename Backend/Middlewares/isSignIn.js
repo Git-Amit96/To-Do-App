@@ -1,28 +1,30 @@
-const  jwt  = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const Profile = require("../Models/user.model");
 
-const isSignIn = async(req, res, next)=>{
+const sign= process.env.JWT_SIGN
+
+const isSignIn = async (req, res, next) => {
     try {
-        // console.log(req.cookies);
+
         const token = req.cookies.Token;
-        // console.log("Token: ",token);
-     
-        if(!token){
+
+
+        if (!token) {
             throw new Error("Access Denied");
         }
-        const decoded = jwt.verify(token, "Auth@12345");
+        const decoded = jwt.verify(token, sign);
 
-        const user = await Profile.findOne({_id: decoded.id});
+        const user = await Profile.findOne({ _id: decoded.id });
 
         if (!user) {
             return res.status(400).json({ status: "Error", message: "User not found. Please Sign Up." });
         }
-        
+
         req.user = user;
-        next();  
+        next();
     } catch (err) {
         res.status(500).json({ status: "Failed", message: err.message });
     }
 }
 
-module.exports= isSignIn;
+module.exports = isSignIn;

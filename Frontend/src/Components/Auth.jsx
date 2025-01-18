@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from "../assets/Logo.svg";
+const apiUrl= import.meta.env.VITE_API_URL;
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(false);
@@ -11,7 +12,7 @@ const Auth = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetch(`http://localhost:5000/to-do/user/isLoggedIn`, {
+        const response = await fetch(`${apiUrl}user/isLoggedIn`, {
           method: 'GET',
           headers: { "Content-Type": "application/json" },
           credentials: 'include',
@@ -41,7 +42,7 @@ const Auth = () => {
     const body = { ...userData, ...(isLogin ? {} : { name: userData.name }) };
 
     try {
-      const response = await fetch(`http://localhost:5000/to-do/user/${isLogin ? "signIn" : "signUp"}`, {
+      const response = await fetch(`${apiUrl}user/${isLogin ? "signIn" : "signUp"}`, {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

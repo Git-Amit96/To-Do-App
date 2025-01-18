@@ -7,6 +7,7 @@ const profileSlice= createSlice({
         name: '',
         email: '',
         isLoggedIn: false,
+        pageInfo: '',
     },
     reducers:{
         setProfile:(state, action)=>{
@@ -19,6 +20,9 @@ const profileSlice= createSlice({
         setLoginState:(state, action)=>{
             state.isLoggedIn= action.payload;
         },
+        updatePage:(state, action)=>{
+            state.pageInfo= action.payload;
+        },
 
         clearProfile:(state)=>{
             state.name='';
@@ -29,5 +33,5 @@ const profileSlice= createSlice({
     }
 })
 
-export const {setProfile, clearProfile, setLoginState}= profileSlice.actions;
+export const {setProfile, clearProfile, setLoginState, updatePage}= profileSlice.actions;
 export default profileSlice.reducer;

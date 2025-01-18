@@ -4,26 +4,27 @@ import { setLoginState, setProfile } from "../Utils/profileSlice";
 import { addTasks } from "../Utils/taskSlice";
 import { useNavigate } from "react-router-dom";
 import TaskCards from "./TaskCards";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const isLoggedIn = useSelector((state) => state.profile.isLoggedIn);
     const profileName = useSelector((state) => state.profile.name);
+    const [page, setPage] = useState("Dashboard");
+    const pageInfo = useSelector((state) => state.profile.pageInfo);
     const tasks = useSelector((state) => state.task.data);
-    
-    const [delayedTasks, setDelayedTasks] = useState([]);
-    const [assignedTasks, setAssignedTasks] = useState([]);
-    const [completedTasks, setCompletedTasks] = useState([]);
-    const [createdTasks, setCreatedTasks] = useState([]);
+    const [mainList, setMainList] = useState([]);
 
+    // Redirect to login page if not logged in
     useEffect(() => {
         if (!isLoggedIn) navigate("/auth");
     }, [isLoggedIn, navigate]);
 
+    // Fetch tasks and profile data
     const fetchTasks = async () => {
         try {
-            const response = await fetch("http://localhost:5000/to-do/tasks/get", {
+            const response = await fetch(`${apiUrl}tasks/get`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -37,7 +38,7 @@ const Dashboard = () => {
 
     const fetchProfile = async () => {
         try {
-            const response = await fetch("http://localhost:5000/to-do/profile/view", {
+            const response = await fetch(`${apiUrl}profile/view`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -51,7 +52,6 @@ const Dashboard = () => {
                 })
             );
             dispatch(setLoginState(true));
-            // console.log(profileName);
         } catch (err) {
             console.error("Error fetching profile:", err);
         }
@@ -60,42 +60,63 @@ const Dashboard = () => {
     useEffect(() => {
         fetchProfile();
         fetchTasks();
-    }, []);
+    }, [dispatch]);
 
+    // Update `mainList` based on the selected page
     useEffect(() => {
-        if (tasks && tasks.data) {
-          const delayedFilterList = tasks.data.filter((e) => e.status === "delayed");
-          setDelayedTasks(delayedFilterList);
-    
-          const completedFilterList = tasks.data.filter((e) => e.status === "completed");
-          setCompletedTasks(completedFilterList);
-          
-          const createdFilterList = tasks.data.filter((e) => e.owner.Name === profileName);
-          setCreatedTasks(createdFilterList);
-
-          const assignedFilterList = tasks.data.filter((e) => e.sharedWith.map(info=>info.Name==profileName));
-          setAssignedTasks(assignedFilterList);
+        if (tasks?.data) {
+            let filteredList = [];
+            switch (page) {
+                case "Assigned":
+                    filteredList = tasks.data.filter((e) =>
+                        e.sharedWith.some((info) => info.Name === profileName)
+                    );
+                    break;
+                case "Active":
+                    filteredList = tasks.data.filter((e) => e.status === "running");
+                    break;
+                case "Completed":
+                    filteredList = tasks.data.filter((e) => e.status === "completed");
+                    break;
+                case "Dashboard":
+                    filteredList = tasks.data;
+                    break;
+                case "Created":
+                    filteredList = tasks.data.filter((e) => e.owner.Name === profileName);
+                    break;
+                default:
+                    filteredList = tasks.data;
+                    break;
+            }
+            setMainList(filteredList);
         }
-      }, [tasks]); 
+    }, [tasks, page, profileName]);
+
+    // Update `page` when `pageInfo` changes
+    useEffect(() => {
+        setPage(pageInfo);
+    }, [pageInfo]);
 
     if (!isLoggedIn) return <p>Login Please...</p>;
+    if (!tasks || !tasks.data) return <p>Loading...</p>;
 
     return (
         <div className="px-8 py-4">
-            <div className="text-3xl font-bold ">
-                <h1>To-Do</h1>
+            <div className="text-3xl font-bold">
+                <h1 className="mb-3 text-gray-700">Tasks</h1>
             </div>
-            <div className=" flex flex-wrap gap-6 justify-start mt-4">
-
-            {tasks?.data ? 
-                tasks.data.map((task) => (
-                    <TaskCards key={task._id} data={task} username={profileName}/>
-                )): (
-                <p>No tasks available.</p>
-            )}
+            <div className="text-3 font-bold flex flex-wrap gap-6 justify-start mt-4 ">
+                {mainList.length > 0 ? (
+                    mainList.map((task) => (
+                        <TaskCards key={task._id} data={task} username={profileName} />
+                    ))
+                ) : (
+                    <p className="text-gray-400">No tasks available</p>
+                )}
             </div>
         </div>
     );
 };
 
 export default Dashboard;
+

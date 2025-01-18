@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const connect = require("./Utils/dbConnect.js");
 const auth = require("./Routes/auth.router.js");
@@ -6,20 +7,20 @@ const cors = require("cors");
 const task = require("./Routes/task.router.js");
 const profile = require("./Routes/profile.router.js");
 const activity = require("./Routes/activity.router.js");
-require('dotenv').config();
 
 const app = express();
+const frontndURL = process.env.FRONTEND_URL;
+const port= process.env.PORT;
+
+
 app.use(cors({
-    origin: 'http://localhost:5173', // Set the exact frontend URL
+    origin: frontndURL, // Set the exact frontend URL
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(cookieParser());
 app.use(express.json());
-
-const port = 5000;
-
 
 app.use("/to-do/user", auth);
 app.use("/to-do/profile", profile);
