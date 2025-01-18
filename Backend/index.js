@@ -10,18 +10,24 @@ const activity = require("./Routes/activity.router.js");
 
 const app = express();
 const frontndURL = process.env.FRONTEND_URL;
-const port= process.env.PORT || 5000;
+const port = process.env.PORT || 5000;
 
+// Validate environment variables
+if (!frontndURL) {
+    console.error("❌ FRONTEND_URL is not defined in the environment variables.");
+    process.exit(1);
+}
 
 app.use(cors({
-    origin: frontndURL, // Set the exact frontend URL
+    origin: frontndURL,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
-    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+    credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(cookieParser());
 app.use(express.json());
 
+// Route handlers
 app.use("/to-do/user", auth);
 app.use("/to-do/profile", profile);
 app.use("/to-do/activity", activity);
@@ -30,14 +36,35 @@ app.use("/to-do", task);
 (async () => {
     try {
         await connect();
-        console.log("Database connected successfully!");
+        console.info("✅ Database connected successfully!");
 
-        app.listen(port, () => {
-            console.log(`Server is running on port ${port}`);
+        const server = app.listen(port, () => {
+            console.info(`🚀 Server is running on port ${port}`);
         });
+
+        // Handle server errors
+        server.on('error', (error) => {
+            if (error.code === 'EADDRINUSE') {
+                console.error(`❌ Port ${port} is already in use. Shutting down.`);
+                process.exit(1);
+            } else {
+                console.error("❌ An error occurred:", error);
+            }
+        });
+
+        // Graceful shutdown on termination signals
+        process.on('SIGINT', async () => {
+            console.info("🛑 Received SIGINT. Closing server gracefully...");
+            server.close(() => {
+                console.info("✅ Server closed successfully.");
+                process.exit(0);
+            });
+        });
+
     } catch (error) {
-        console.error("Failed to connect to the database:", error.message);
+        console.error("❌ Failed to connect to the database:", error.message);
         process.exit(1);
     }
 })();
+
 
