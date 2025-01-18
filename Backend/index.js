@@ -10,7 +10,7 @@ const activity = require("./Routes/activity.router.js");
 
 const app = express();
 const frontndURL = process.env.FRONTEND_URL;
-const port= process.env.PORT;
+const port= process.env.PORT || 5000;
 
 
 app.use(cors({
