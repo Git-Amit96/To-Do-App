@@ -10,7 +10,7 @@ const activity = require("./Routes/activity.router.js");
 
 const app = express();
 const frontndURL = process.env.FRONTEND_URL;
-const port = process.env.PORT ;
+const port = process.env.PORT || 9090;
 
 // Validate environment variables
 if (!frontndURL) {
@@ -32,6 +32,15 @@ app.use("/to-do/user", auth);
 app.use("/to-do/profile", profile);
 app.use("/to-do/activity", activity);
 app.use("/to-do", task);
+
+app.get("/", (req, res) => {
+    res.send("Welcome to the To-Do App Backend!");
+});
+
+// Handle unknown routes
+app.use((req, res) => {
+    res.status(404).send({ message: "Route not found" });
+});
 
 (async () => {
     try {
