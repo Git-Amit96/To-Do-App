@@ -39,7 +39,7 @@ const CreateOrUpdate = () => {
         setTitle(specificTask.title || "");
         setDescription(specificTask.description || "");
         setSharedWith(specificTask.sharedWith.map((e) => e.Email) || []);
-        setDeadline(new Date(specificTask.deadline));
+        //setDeadline(new Date(specificTask.deadline));
 
         const deadlineDate = new Date(specificTask.deadline);
         const dateDifference = deadlineDate.getTime() - Date.now();

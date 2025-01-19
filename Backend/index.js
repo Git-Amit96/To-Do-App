@@ -10,6 +10,7 @@ const activity = require("./Routes/activity.router.js");
 
 const app = express();
 const frontndURL = process.env.FRONTEND_URL;
+
 const port = process.env.PORT || 9090;
 
 // Validate environment variables
@@ -17,12 +18,22 @@ if (!frontndURL) {
     console.error("❌ FRONTEND_URL is not defined in the environment variables.");
     process.exit(1);
 }
+if (!process.env.DB_URI) {
+    console.error("❌ DB_URI is not defined in the environment variables.");
+    process.exit(1);
+}
 
+const allowedOrigins = [
+    `http://${frontndURL}`,
+    `https://${frontndURL}`,
+    "http://localhost:5173"
+];
+
+// Middleware setup
 app.use(cors({
-    origin: frontndURL,
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(cookieParser());
 app.use(express.json());
@@ -42,6 +53,13 @@ app.use((req, res) => {
     res.status(404).send({ message: "Route not found" });
 });
 
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error("❌ An error occurred:", err.stack || err.message);
+    res.status(err.status || 500).send({ message: "Internal Server Error" });
+});
+
+// Start server
 (async () => {
     try {
         await connect();
@@ -61,10 +79,16 @@ app.use((req, res) => {
             }
         });
 
-        // Graceful shutdown on termination signals
+        // Graceful shutdown
         process.on('SIGINT', async () => {
-            console.info("🛑 Received SIGINT. Closing server gracefully...");
-            server.close(() => {
+            console.info("🛑 Received SIGINT. Closing server and database connection gracefully...");
+            server.close(async () => {
+                try {
+                    await disconnect(); // Close DB connection
+                    console.info("✅ Database connection closed.");
+                } catch (dbError) {
+                    console.error("❌ Failed to close database connection:", dbError.message);
+                }
                 console.info("✅ Server closed successfully.");
                 process.exit(0);
             });
@@ -75,5 +99,6 @@ app.use((req, res) => {
         process.exit(1);
     }
 })();
+
 
 
