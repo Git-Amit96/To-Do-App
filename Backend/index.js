@@ -14,14 +14,10 @@ const frontndURL = process.env.FRONTEND_URL;
 const port = process.env.PORT || 9090;
 
 // Validate environment variables
-if (!frontndURL) {
-    console.error("❌ FRONTEND_URL is not defined in the environment variables.");
-    process.exit(1);
-}
-if (!process.env.DB_URI) {
-    console.error("❌ DB_URI is not defined in the environment variables.");
-    process.exit(1);
-}
+// if (!frontndURL) {
+//     console.error("❌ FRONTEND_URL is not defined in the environment variables.");
+//     process.exit(1);
+// }
 
 const allowedOrigins = [
     `http://${frontndURL}`,
