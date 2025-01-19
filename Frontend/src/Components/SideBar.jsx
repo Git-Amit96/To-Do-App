@@ -12,7 +12,7 @@ import {
   MdDarkMode,
   MdLogout,
 } from "react-icons/md";
-import logo from "../assets/Logo.svg";
+import logo from "../Assets/logo.svg";
 import { clearProfile, updatePage } from "../Utils/profileSlice";
 import { clearTasks } from "../Utils/taskSlice";
 
