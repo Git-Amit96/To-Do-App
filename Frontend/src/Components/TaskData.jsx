@@ -155,7 +155,7 @@ const TaskData = () => {
     }
     const { bgColor, status } = getStatusDetails();
     return (
-        <div className="sm:px-8 py-5 mt-6 flex-col justify-center items-center transition-all duration-100">
+        <div className="small:px-5   flex-col justify-center items-center transition-all duration-100">
             {isVisible ?
                 <div className='flex justify-center items-center'>
                     <div className=' mx-auto border  border-gray-300 rounded-lg shadow-md bg-white p-4 '>
@@ -182,9 +182,9 @@ const TaskData = () => {
                 </div> : <></>}
 
             {!isVisible && notPopUp ? (
-                <div className="flex flex-col lg:flex-row  bg-gray-100">
+                <div className="flex flex-col lg:flex-row mt-5">
                     {/* Task Card Section */}
-                    <div className="lg:w-1/2 w-full p-4">
+                    <div className="lg:w-1/2 w-full  p-4">
                         <div className="border border-gray-300 rounded-lg shadow-md bg-white transition-all duration-200 overflow-hidden">
                             {/* Task Card Content */}
                             {(userId.toString() == taskInfo.owner._id) ?
@@ -214,9 +214,9 @@ const TaskData = () => {
                             }
 
                             <div className={`px-6 pb-4 sm:pb-6 ${(userId.toString() != taskInfo.owner._id) ? "mt-4" : ""}`}>
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                                <div className="flex flex-col  justify-between items-start gap-4 mb-4">
                                     <h1
-                                        className="text-4xl sm:text-2xl lg:text-3xl font-bold text-gray-800 truncate w-full"
+                                        className=" small:text-2xl text-xl sm:text-3xl lg:text-4xl font-bold text-gray-800  w-full"
                                         title={taskInfo?.title}
                                     >
                                         {taskInfo?.title}
@@ -248,7 +248,7 @@ const TaskData = () => {
                                         {(taskInfo?.sharedWith || []).map((member, index) => (
                                             <div
                                                 key={index}
-                                                className="w-fit px-2 py-1 rounded-md items-center justify-center bg-blue-500 text-white text-xs font-bold"
+                                                className="w-fit px-2 py-1 rounded-md items-center justify-center bg-blue-100 text-blue-400 text-xs font-bold"
                                                 title={member?.Name}
                                             >
                                                 {member?.Name}
@@ -271,7 +271,7 @@ const TaskData = () => {
                     </div>
 
                     {/* Activity Section */}
-                    <div className="lg:w-1/2 w-full max-h-[450px] h-fit p-4 flex flex-col">
+                    <div className="lg:w-1/2 w-full max-h-[450px]  p-4 flex flex-col justify-between ">
                         <div className=" overflow-y-auto ">
                             <div className="p-4">
                                 <div className="text-xl font-bold mb-2">Activity</div>
@@ -282,7 +282,7 @@ const TaskData = () => {
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-gray-500 text-center mt-4">No activity available.</p>
+                                    <p className="text-gray-500 text-center">No activity available.</p>
                                 )}
                             </div>
                         </div>
@@ -296,7 +296,7 @@ const TaskData = () => {
                                 <div className="flex gap-2 justify-between w-full items-center">
                                     <textarea
                                         placeholder="Add an activity..."
-                                        className="p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        className="p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
                                         rows="1"
                                         value={newActivityText}
                                         onChange={(e) => setNewActivityText(e.target.value)}

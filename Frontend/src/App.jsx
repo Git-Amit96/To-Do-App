@@ -5,54 +5,59 @@ import Header from "./Components/Header";
 import Dashboard from "./Components/Dashboard";
 import CreateOrUpdate from "./Components/CreateTask";
 import TaskData from "./Components/TaskData";
+import ProtectedRoute from "./Components/ProtectedRoute";
+import { useSelector } from "react-redux";
 
 
 const MainLayout = () => {
   return (
-    <div className="max-w-[1600px] flex flex-nowrap box-border  bg-gray-100  h-full min-h-screen">
-      <div className="">
-      <SideBar />
-
+    <div className="max-w-[1600px] m-auto w-[100%] h-screen  flex ">
+      <div className=" min:w-[26%] max-w-[350px]  ">
+        <SideBar />
       </div>
+      <div className=" overflow-y-scroll w-[100%]">
+        <div className="sticky top-0 ">
 
-      <div className="w-[100%]  box-border bg-gray-100 ">
-        <Header/>
-        <div className="">
-        <Outlet />
-
+          <Header />
         </div>
+        <Outlet />
       </div>
     </div>
   );
 };
 
-const appRouter = createBrowserRouter([
-  
-{
-    path: "/",
-    element: <Auth />
-  },
-  {
-    path: "/dashboard",
-    element: <MainLayout />,
-    children: [
-      {
-        path: "/dashboard",
-        element: <Dashboard />
-      },
-      {
-        path: "/dashboard/status/:info",
-        element: <CreateOrUpdate/>
-      },
-      {
-        path: "/dashboard/task/:id",
-        element: <TaskData/>
-      }
-    ]
-  }
-])
-
 const App = () => {
+  const isLoggedIn = useSelector((state) => state.profile.isLoggedIn);
+
+  const appRouter = createBrowserRouter([
+
+    {
+      path: "/",
+      element: <Auth />
+    },
+    {
+      path: "/dashboard",
+      element: (
+        <ProtectedRoute isLoggedIn={isLoggedIn}>
+          <MainLayout />
+        </ProtectedRoute>
+      ),
+      children: [
+        {
+          index: true, // Default child route
+          element: <Dashboard />,
+        },
+        {
+          path: "status/:info",
+          element: <CreateOrUpdate />,
+        },
+        {
+          path: "task/:id",
+          element: <TaskData />,
+        },
+      ],
+    },
+  ])
   return <RouterProvider router={appRouter} />
 }
 

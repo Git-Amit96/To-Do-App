@@ -19,7 +19,7 @@ const Dashboard = () => {
     // Redirect to login page if not logged in
     useEffect(() => {
         if (!isLoggedIn) navigate("/");
-    }, [isLoggedIn, navigate]);
+    }, [isLoggedIn]);
 
     // Fetch tasks and profile data
     const fetchTasks = async () => {
@@ -29,13 +29,14 @@ const Dashboard = () => {
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
             });
+            if (!response.ok) throw new Error("Failed to fetch tasks");
             const tasksData = await response.json();
             dispatch(addTasks(tasksData));
         } catch (err) {
             console.error("Error fetching tasks:", err);
         }
     };
-
+    
     const fetchProfile = async () => {
         try {
             const response = await fetch(`${apiUrl}profile/view`, {
@@ -43,8 +44,8 @@ const Dashboard = () => {
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
             });
+            if (!response.ok) throw new Error("Failed to fetch profile");
             const profileData = await response.json();
-           
             dispatch(
                 setProfile({
                     id: profileData.profile._id,
@@ -52,7 +53,6 @@ const Dashboard = () => {
                     email: profileData.profile.Email,
                 })
             );
-            dispatch(setLoginState(true));
         } catch (err) {
             console.error("Error fetching profile:", err);
         }
@@ -98,15 +98,15 @@ const Dashboard = () => {
         setPage(pageInfo);
     }, [pageInfo]);
 
-    if (!isLoggedIn) return <p>Login Please...</p>;
-    if (!tasks || !tasks.data) return <p>Loading...</p>;
+    if (!isLoggedIn) return <p className="px-8 py-4 " >Login Please...</p>;
+    if (!tasks || !tasks.data) return <p className="px-8 py-4 ">Loading...</p>;
 
     return (
-        <div className="px-8 py-4">
-            <div className="text-3xl font-bold">
+        <div className="px-8 py-4 ">
+            <div className="text-3xl font-bold ">
                 <h1 className="mb-3 text-gray-700">Tasks</h1>
             </div>
-            <div className="text-3 font-bold flex flex-wrap gap-6 justify-start mt-4 ">
+            <div className="text-3xl font-bold flex flex-wrap gap-y-6 justify-between mt-4 m-auto">
                 {mainList.length > 0 ? (
                     mainList.map((task) => (
                         <TaskCards key={task._id} data={task} username={profileName} />

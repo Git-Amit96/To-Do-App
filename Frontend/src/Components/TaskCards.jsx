@@ -3,7 +3,7 @@ import { formatDistanceToNow, format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
 const TaskCards = ({ data, username }) => {
-  const navigate= useNavigate();
+  const navigate = useNavigate();
   const { title, owner, sharedWith, createdAt, deadline, status, description, _id } = data;
   const [isOwner, setIsOwner] = useState(false);
 
@@ -18,32 +18,31 @@ const TaskCards = ({ data, username }) => {
   let dateDifference = new Date(deadline).getTime() - Date.now();
 
   if (status === "completed") {
-    bgColor = "bg-gray-700 text-gray-400";
+    bgColor = "bg-gray-700 text-white";
     newStatus = "Completed";
   } else if (dateDifference > 0) {
-    bgColor = "bg-green-100 text-green-800";
+    bgColor = "bg-green-700 text-white";
     newStatus = "Active";
   } else if (dateDifference < 0) {
-    bgColor = "bg-red-100 text-yellow-800";
+    bgColor = "bg-red-600 text-white";
     newStatus = "Delayed";
   }
 
 
-  const showTasks=()=>{
+  const showTasks = () => {
     navigate(`/dashboard/task/${_id}`);
   }
 
   return (
-    <div className="max-w-sm w-full p-6 border border-gray-300 rounded-lg shadow-md bg-white hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-[1.02]" onClick={showTasks}>
+    <div className=" p-6 w-[100%] lg:w-[49%]  border border-gray-300 rounded-lg shadow-md bg-white hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-[1.02]" onClick={showTasks}>
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold text-gray-800 truncate" title={title}>
+        <h1 className="text-lg small:text-xl font-bold text-gray-800  mr-2" title={title}>
           {title}
         </h1>
         <span
-          className={`text-xs font-semibold px-3 py-1 rounded-full uppercase ${bgColor}`}
+          className={`text-xs font-semibold px-2 py-2 rounded-full ${bgColor}`}
         >
-          {newStatus}
         </span>
       </div>
 
