@@ -9,20 +9,16 @@ const profile = require("./Routes/profile.router.js");
 const activity = require("./Routes/activity.router.js");
 
 const app = express();
-const frontndURL = process.env.FRONTEND_URL;
+const frontendURL = process.env.FRONTEND_URL;
 
 const port = process.env.PORT || 9090;
 
-// Validate environment variables
-// if (!frontndURL) {
-//     console.error("❌ FRONTEND_URL is not defined in the environment variables.");
-//     process.exit(1);
-// }
-
+console.error(frontendURL);
 const allowedOrigins = [
-    `http://${frontndURL}`,
-    `https://${frontndURL}`,
-    "http://localhost:5173"
+    `http://${frontendURL}`,
+    `https://${frontendURL}`,
+    "http://localhost:5173",
+    "http://localhost:5173/"
 ];
 
 // Middleware setup
@@ -30,6 +26,7 @@ app.use(cors({
     origin: allowedOrigins,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(cookieParser());
 app.use(express.json());
