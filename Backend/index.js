@@ -13,12 +13,11 @@ const frontendURL = process.env.FRONTEND_URL;
 
 const port = process.env.PORT || 9090;
 
-console.error(frontendURL);
 const allowedOrigins = [
-    `http://${frontendURL}`,
-    `https://${frontendURL}`,
+    "https://mellow-frangipane-e24486.netlify.app",
     "http://localhost:5173",
-    "http://localhost:5173/"
+    "http://localhost:5173/",
+    frontendURL,
 ];
 
 // Middleware setup
