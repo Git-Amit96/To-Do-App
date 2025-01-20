@@ -114,9 +114,12 @@ const isLoggedIn = async(req, res)=>{
 
 const logout = (_, res) => {
     res.cookie("Token", null, {
-        expires: new Date(Date.now())
-    })
-    res.status(200).json({success:true, message:"Logout Successful"});
+        expires: new Date(Date.now()),  // Expire immediately
+        httpOnly: true,   // Prevents JavaScript from accessing the cookie
+        secure: true,    // Use true in production when using HTTPS
+        sameSite: 'none', // Use 'none' for cross-site, requires HTTPS
+    });
+    res.status(200).json({ success: true, message: "Logout Successful" });
 };
 
 const newOtp = async (req, res) => {

@@ -35,10 +35,11 @@ const CreateOrUpdate = () => {
   useEffect(() => {
     if (status === "update" && taskData) {
       const specificTask = taskData?.find((e) => e._id.toString() === id.toString());
+      console.log(specificTask);
       if (specificTask) {
-        setTitle(specificTask.title || "");
-        setDescription(specificTask.description || "");
-        setSharedWith(specificTask.sharedWith.map((e) => e.Email) || []);
+        setTitle(specificTask.title );
+        setDescription(specificTask.description);
+        setSharedWith(specificTask.sharedWith.map((e) => e.Email));
         //setDeadline(new Date(specificTask.deadline));
 
         const deadlineDate = new Date(specificTask.deadline);
@@ -82,7 +83,7 @@ const CreateOrUpdate = () => {
       sharedWith,
       deadline: formattedDate,
     };
-
+    console.log(taskData);
     try {
       const response = await fetch(
         `${apiUrl}tasks/${status === "update" ? `update/${id}` : "create"}`,

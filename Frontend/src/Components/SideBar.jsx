@@ -29,10 +29,12 @@ const SideBar = () => {
       const response = await fetch(`${apiUrl}user/logout`, {
         method: "POST",
         credentials: "include",
+        headers: { "Content-Type": "application/json" },
+
       });
 
       const data = await response.json();
-
+      console.log(data);
       if (data.success) {
         dispatch(clearProfile());
         dispatch(clearTasks());
