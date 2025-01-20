@@ -27,12 +27,9 @@ const MainLayout = () => {
 };
 
 const appRouter = createBrowserRouter([
-  {
+  
+{
     path: "/",
-    element: <Navigate to={"/auth"} replace/>
-  },
-  {
-    path: "/auth",
     element: <Auth />
   },
   {

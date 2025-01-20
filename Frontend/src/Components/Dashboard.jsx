@@ -18,7 +18,7 @@ const Dashboard = () => {
 
     // Redirect to login page if not logged in
     useEffect(() => {
-        if (!isLoggedIn) navigate("/auth");
+        if (!isLoggedIn) navigate("/");
     }, [isLoggedIn, navigate]);
 
     // Fetch tasks and profile data
@@ -44,6 +44,7 @@ const Dashboard = () => {
                 credentials: "include",
             });
             const profileData = await response.json();
+           
             dispatch(
                 setProfile({
                     id: profileData.profile._id,

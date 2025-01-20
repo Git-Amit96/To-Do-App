@@ -36,7 +36,7 @@ const SideBar = () => {
       if (data.success) {
         dispatch(clearProfile());
         dispatch(clearTasks());
-        navigate("/auth");
+        navigate("/");
       } else {
         console.error("Logout failed:", data.message || "Unknown error");
       }

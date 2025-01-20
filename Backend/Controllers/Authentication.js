@@ -67,7 +67,7 @@ const signIn = async (req, res) => {
 
         res.cookie("Token", token, {
             httpOnly: true,   // Prevents JavaScript from accessing the cookie
-            secure: false,    // Set to true in production when using HTTPS
+            secure: true,    // Set to true in production when using HTTPS
             sameSite: 'Lax',  // Or 'strict' or 'none' if cross-site, but 'none' requires HTTPS
         });
         return res.status(201).json({
